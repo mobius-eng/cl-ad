@@ -249,13 +249,14 @@ It is assumed (F Z) just leaves Z intact"
 (defun exp (number)
   (lifted-unary number #'cl:exp (lambda (x) (exp x))))
 
-(defun log (number &optional base)
-  (lifted-unary number
-                (lambda (x) (cl:log x base))
-                (lambda (x)
-                  (if (null base)
-                      (/ x)
-                      (/ (log (exp 1.0d0) base) x)))))
+(defun log (number &optional (base nil base-p))
+  (if base-p
+      (lifted-unary number
+                    (lambda (x) (cl:log x base))
+                    (lambda (x) (/ (log (exp 1.0d0) base) x)))
+      (lifted-unary number
+                    (lambda (x) (cl:log x))
+                    (lambda (x) (/ x)))))
 
 (defun expt (base power)
   (lifted-binary base power
