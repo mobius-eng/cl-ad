@@ -3,7 +3,7 @@
 [Automatic (algorithmic) differentiation](https://en.wikipedia.org/wiki/Automatic_differentiation)
 library for Common Lisp. It is based on
 [Scheme library](https://github.com/qobi/R6RS-AD) but is implemented
-in a more generic way using CLOS. 
+in a more generic way using CLOS.
 
 ## What is "automatic (algorithmic) differentiation (AD)"?
 
@@ -43,5 +43,6 @@ Reverse derivatives - TODO
 
 Copyright © 2016 Alexey Cherkaev (mobius-eng)
 
-Distributed under Lesser GNU Public License 3 or (at your option) any
-later version.
+Distributed under
+[Lesser GNU Public License 3](http://www.gnu.org/licenses/lgpl-3.0.en.html)
+or (at your option) any later version.
