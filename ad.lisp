@@ -219,15 +219,19 @@ It is assumed (F Z) just leaves Z intact"
   (apply f (mapcar #'primal* xs)))
 
 (defun + (&rest numbers)
+  "Return the sum of its arguments. With no args, returns 0."
   (lift-multi* #'cl:+ (constantly 1) (constantly 1) numbers))
 
 (defun * (&rest numbers)
+  "Return the product of its arguments. With no args, returns 1."
   (lift-multi* #'cl:*
                (lambda (x1 x2) (declare (ignore x1)) x2)
                (lambda (x1 x2) (declare (ignore x2)) x1)
                numbers))
 
 (defun - (number &rest more-numbers)
+  "Subtract the second and all subsequent arguments from the first;
+      or with one argument, negate the first argument."
   (lift-multi+ #'cl:-
                (constantly -1)
                (constantly 1)
@@ -236,6 +240,8 @@ It is assumed (F Z) just leaves Z intact"
                more-numbers))
 
 (defun / (number &rest more-numbers)
+  "Divide the first argument by each of the following arguments, in turn.
+      With one argument, return reciprocal."
   (lift-multi+ #'cl:/
                (lambda (x) (- (/ (expt x 2))))
                (lambda (x1 x2) (declare (ignore x1)) (/ x2))
@@ -244,12 +250,15 @@ It is assumed (F Z) just leaves Z intact"
                more-numbers))
 
 (defun sqrt (number)
+  "Return the square root of NUMBER."
   (lifted-unary number #'cl:sqrt (lambda (x) (/ 1 (* 2 (sqrt x))))))
 
 (defun exp (number)
+  "Return e raised to the power NUMBER."
   (lifted-unary number #'cl:exp (lambda (x) (exp x))))
 
 (defun log (number &optional (base nil base-p))
+  "Return the logarithm of NUMBER in the base BASE, which defaults to e."
   (if base-p
       (lifted-unary number
                     (lambda (x) (cl:log x base))
@@ -259,6 +268,7 @@ It is assumed (F Z) just leaves Z intact"
                     (lambda (x) (/ x)))))
 
 (defun expt (base power)
+  "Return BASE raised to the POWER."
   (lifted-binary base power
                  #'cl:expt
                  (lambda (x1 x2)
@@ -269,75 +279,101 @@ It is assumed (F Z) just leaves Z intact"
                  (lambda (x1 x2) (* (log x1) (expt x1 x2)))))
 
 (defun sin (number)
+  "Return the sine of NUMBER."
   (lifted-unary number #'cl:sin (lambda (x) (cos x))))
 
 (defun cos (number)
+  "Return the cosine of NUMBER."
   (lifted-unary number #'cl:cos (lambda (x) (- (sin x)))))
 
 (defun tan (number)
+  "Return the tangent of NUMBER."
   (lifted-unary number #'cl:tan (lambda (x) (+ 1 (expt (tan x) 2)))))
 
 (defun asin (number)
+  "Return the arc sine of NUMBER."
   (lifted-unary number #'cl:asin (lambda (x) (/ 1 (sqrt (- 1 (expt x 2)))))))
 
 (defun acos (number)
+  "Return the arc cosine of NUMBER."
   (lifted-unary number #'cl:acos (lambda (x) (- (/ 1 (sqrt (- 1 (expt x 2))))))))
 
-(defun atan (number)
-  (lifted-unary number #'cl:atan (lambda (x) (/ 1 (+ 1 (expt x 2))))))
+(defun atan (y &optional x)
+  "Return the arc tangent of Y if X is omitted or Y/X if X is supplied."
+  (let ((number (if x (/ y x) y)))
+    (lifted-unary number #'cl:atan (lambda (x) (/ 1 (+ 1 (expt x 2)))))))
 
 (defun sinh (number)
+  "Return the hyperbolic sine of NUMBER."
   (lifted-unary number #'cl:sinh (lambda (x) (cosh x))))
 
 (defun cosh (number)
+  "Return the hyperbolic cosine of NUMBER."
   (lifted-unary number #'cl:cosh (lambda (x) (sinh x))))
 
 (defun tanh (number)
+  "Return the hyperbolic tangent of NUMBER."
   (lifted-unary number #'cl:tanh (lambda (x) (- 1 (expt (tanh x) 2)))))
 
 (defun = (number &rest more-numbers)
+  "Return T if all of its arguments are numerically equal, NIL otherwise."
   (lift-multi-bool #'cl:= (cons number more-numbers)))
 
 (defun < (number &rest more-numbers)
+  "Return T if its arguments are in strictly increasing order, NIL otherwise."
   (lift-multi-bool #'cl:< (cons number more-numbers)))
 
 (defun > (number &rest more-numbers)
+  "Return T if its arguments are in strictly decreasing order, NIL otherwise."
   (lift-multi-bool #'cl:> (cons number more-numbers)))
 
 (defun <= (number &rest more-numbers)
+  "Return T if arguments are in strictly non-decreasing order, NIL otherwise."
   (lift-multi-bool #'cl:<= (cons number more-numbers)))
 
 (defun >= (number &rest more-numbers)
+  "Return T if arguments are in strictly non-increasing order, NIL otherwise."
   (lift-multi-bool #'cl:>= (cons number more-numbers)))
 
 (defun /= (number &rest more-numbers)
+  "Return T if arguments are in strictly non-increasing order, NIL otherwise."
   (lift-multi-bool #'cl:/= (cons number more-numbers)))
 
 (defun zerop (number)
+  "Is this number zero?"
   (lift-multi-bool #'cl:zerop (list number)))
 
 (defun plusp (number)
+  "Is this real number strictly positive?"
   (lift-multi-bool #'cl:plusp (list number)))
 
 (defun minusp (number)
+  "Is this real number strictly negative?"
   (lift-multi-bool #'cl:minusp (list number)))
 
 (defun numberp (object)
+  "Return true if OBJECT is a NUMBER, and NIL otherwise."
   (lift-multi-bool #'cl:numberp (list object)))
 
 (defun 1+ (number)
+  "Return NUMBER + 1."
   (+ 1 number))
 
 (defun 1- (number)
+  "Return NUMBER - 1."
   (- 1 number))
 
 (define-modify-macro decf (&optional (delta 1))
   (lambda (place &optional (delta 1))
-    (- place delta)))
+    (- place delta))
+  "The first argument is some location holding a number. This number is
+      decremented by the second argument, DELTA, which defaults to 1.")
 
 (define-modify-macro incf (&optional (delta 1))
   (lambda (place &optional (delta 1))
-    (+ place delta)))
+    (+ place delta))
+  "The first argument is some location holding a number. This number is
+      incremented by the second argument, DELTA, which defaults to 1.")
 
 (defun forward-mode (map-independent map-dependent f x x-perturbation)
   "Functional way of forward mode of differentiation"
