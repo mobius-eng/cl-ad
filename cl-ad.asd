@@ -6,4 +6,5 @@
   :depends-on (:alexandria)
   :serial t
   :components ((:file "package")
-               (:file "ad")))
+               (:file "ad")
+               (:file "clad")))
